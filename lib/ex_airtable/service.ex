@@ -62,7 +62,7 @@ defmodule ExAirtable.Service do
       %{"deleted" => true, "id" => "recJmmAR0IzpaekBn"}
   """
   def delete(%Config.Table{} = table, id) when is_binary(id) do
-    perform_request(table, method: :delete, url_suffix: "/#{id}")
+    perform_request(table, method: :delete, url_suffix: id)
   end
 
   @doc """
@@ -100,7 +100,7 @@ defmodule ExAirtable.Service do
   Returns an `%Airtable.Record{}` on success and an `{:error, reason}` tuple on failure.
   """
   def retrieve(%Config.Table{} = table, id) when is_binary(id) do
-    perform_request(table, url_suffix: "/" <> id)
+    perform_request(table, url_suffix: id)
     |> Airtable.Record.from_map()
   end
 
@@ -128,13 +128,18 @@ defmodule ExAirtable.Service do
     |> Airtable.List.from_map()
   end
 
-  defp base_url(%Config.Table{} = table, suffix) when is_binary(suffix) do
+  defp base_url(table, suffix \\ nil)
+
+  defp base_url(%Config.Table{} = table, nil) do
     table.base.endpoint_url <>
       "/" <>
       encode(table.base.id) <>
       "/" <>
-      encode(table.name) <>
-      encode(suffix)
+      encode(table.name)
+  end
+
+  defp base_url(%Config.Table{} = table, suffix) when is_binary(suffix) do
+    base_url(table) <> "/" <> encode(suffix)
   end
 
   defp default_headers(%Config.Table{} = table) do
@@ -155,7 +160,7 @@ defmodule ExAirtable.Service do
       headers: default_headers(table),
       method: Keyword.get(opts, :method, :get),
       params: Keyword.get(opts, :params),
-      url: base_url(table, Keyword.get(opts, :url_suffix, ""))
+      url: base_url(table, Keyword.get(opts, :url_suffix))
     }
 
     case request(request_data) do
