@@ -104,7 +104,7 @@ defmodule ExAirtable.Table do
 
   See also `to_schema/1` and `from_schema/1`.
   """
-  @callback schema() :: map()
+  @callback schema() :: map() | nil
 
   @doc false
   def update_params(list_params, opts) do
