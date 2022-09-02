@@ -28,6 +28,8 @@ defmodule ExAirtable.Service do
 
   alias ExAirtable.{Airtable, Config}
 
+  @httpoison_opts Application.compile_env(:ex_airtable, :httpoison_opts, [])
+
   @doc """
   Create a record in Airtable. Pass in a valid `%ExAirtable.Airtable.List{}` struct. 
 
@@ -160,7 +162,8 @@ defmodule ExAirtable.Service do
       headers: default_headers(table),
       method: Keyword.get(opts, :method, :get),
       params: Keyword.get(opts, :params),
-      url: base_url(table, Keyword.get(opts, :url_suffix))
+      url: base_url(table, Keyword.get(opts, :url_suffix)),
+      options: @httpoison_opts
     }
 
     case request(request_data) do
