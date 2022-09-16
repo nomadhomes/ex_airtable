@@ -38,7 +38,7 @@ defmodule ExAirtable.Service do
   ## Example
 
       iex> create(table, %List{})
-      %List{}
+      {:ok, %List{}}
 
       iex> create(table, list_with_errors)
       {:error, reason}
@@ -49,8 +49,10 @@ defmodule ExAirtable.Service do
       |> remove_objectionable_fields()
       |> Jason.encode!()
 
-    perform_request(table, method: :post, body: body)
-    |> Airtable.List.from_map()
+    case perform_request(table, method: :post, body: body) do
+      {:error, _} = error -> error
+      map -> {:ok, Airtable.List.from_map(map)}
+    end
   end
 
   @doc """
